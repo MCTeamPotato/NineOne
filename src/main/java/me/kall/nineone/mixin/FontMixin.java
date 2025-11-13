@@ -10,22 +10,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
-@Mixin(Font.class)
+@Mixin(value = Font.class, priority = 91)
 public class FontMixin implements NineOneRenderer {
     @Unique private final Set<String> nineOne$remaining = new ObjectOpenHashSet<>();
 
-    @ModifyVariable(method = "drawInternal(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;IIZ)I", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = {"drawInternal(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;IIZ)I", "drawInBatch(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)I", "drawInBatch(Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;IIZ)I"}, at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private String nineOneMemeInject(String text) {
-        if (this.nineOne$remaining.contains(text)) return "91";
-
-        if (ThreadLocalRandom.current().nextInt(NineOneClient.Config.CHANCE.get()) == 1 && NineOneClient.check(text)) {
-            this.nineOne$remaining.add(text);
-            return "91";
-        }
-
-        return text;
+        return NineOneClient.replace(text, this);
     }
 
     @Override
