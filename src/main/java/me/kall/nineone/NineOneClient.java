@@ -12,10 +12,12 @@ import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
 @Mod.EventBusSubscriber(modid = NineOne.MOD_ID, value = Dist.CLIENT)
 public class NineOneClient {
     private static long lastTriggerMoment = -1;
+    private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d+");
 
     public static int check(String s) {
         if (s == null || s.isEmpty()) return -1;
@@ -30,14 +32,13 @@ public class NineOneClient {
 
     public static String replace(@NotNull String text, NineOneRenderer nineOneRenderer) {
         String replacement = NineOneClient.Config.TEXT.get();
-        int index = NineOneClient.check(text);
-        if (index == -1) return text;
 
-        if (nineOneRenderer.nineOne$getRemaining().contains(text)) return text.replaceAll("\\d+", replacement);
+        if (NineOneClient.check(text) == -1) return text;
+        if (nineOneRenderer.nineOne$getRemaining().contains(text)) return DIGIT_PATTERN.matcher(text).replaceAll(replacement);
 
         if (ThreadLocalRandom.current().nextInt(NineOneClient.Config.CHANCE.get()) == 0) {
             nineOneRenderer.nineOne$getRemaining().add(text);
-            return text.replaceAll("\\d+", replacement);
+            return DIGIT_PATTERN.matcher(text).replaceAll(replacement);
         }
 
         return text;
